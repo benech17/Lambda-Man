@@ -205,7 +205,6 @@ let visibility_graph observation memory =
 
    Il nous suffit maintenant de trouver le chemin le plus rapide pour
    aller d'une source à une cible dans le graphe.
-
 *)
 let shortest_path graph source target : path =
   [] (* Students, this is your job! *)
@@ -227,9 +226,26 @@ let shortest_path graph source target : path =
    et le faire suivre un premier chemin.
 
 *)
-let plan visualize observation memory =
-  memory (* Students, this is your job! *)
+let compute_angle p1 p2 = 
+   let x1 = Space.x_ p1 and
+       x2 = Space.x_ p2 and
+       y1 = Space.y_ p1 and
+       y2 = Space.y_ p2 in
+     Space.angle_of_float (Float.atan ((y2 -. y1) /. (x2 -. x1)))
 
+let plan visualize observation memory =
+   let trees_pos = World.tree_positions observation.trees in
+let memory'=
+  match memory.objective with
+   | Initializing -> let targets' = trees_pos in
+                     let objective' = GoingTo (targets', targets') in
+                     {memory with objective = objective' ; targets= targets'}
+   | Chopping ->  memory(** let targets' = List.tl trees_pos in
+                  let objective' = GoingTo(List.tl trees_pos, trees_pos) in
+                    **)
+
+   | GoingTo (p1,p2) ->  memory
+      in memory' 
 
 (**
 
@@ -249,8 +265,21 @@ let plan visualize observation memory =
 
 *)
 let next_action visualize observation memory =
-  Move (Space.angle_of_float 0., Space.speed_of_float 1.), memory
-
+   let pos = observation.position in
+   match memory.objective with
+      | Initializing -> failwith("not a good robot")
+      | Chopping ->  let tree= match World.tree_at observation.trees pos with
+               | None -> failwith("Chopping null tree!")
+               | Some(t) -> t
+            and targets' = List.tl memory.targets
+            in let tpos = List.hd targets' in
+            if(tree.branches = 0) then let objective' = GoingTo (targets', World.tree_positions observation.trees) in
+               (Wait , {memory with objective = objective' ; targets = targets'}) 
+            else (ChopTree , memory) 
+      | GoingTo(p1 , p2) -> let t_pos = List.hd p1 in
+            if Space.close pos t_pos 1. then ChopTree, {memory with objective=Chopping}
+            else Move (compute_angle pos t_pos, Space.speed_of_float 1.), memory
+  
 (**
 
    Comme promis, la fonction de décision est la composition

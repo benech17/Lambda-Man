@@ -150,10 +150,10 @@ let control_loop () =
       | 'q' -> exit 1
       | 'e' -> zoom := min 10. (!zoom +. dzoom)
       | 'r' -> zoom := max 0.1 (!zoom -. dzoom)
-      | 't' -> view_y := !view_y -. d
-      | 'g' -> view_y := !view_y +. d
-      | 'h' -> view_x := !view_x -. d
-      | 'f' -> view_x := !view_x +. d
+      | 's' -> view_y := !view_y -. d
+      | 'w' -> view_y := !view_y +. d
+      | 'a' -> view_x := !view_x -. d
+      | 'd' -> view_x := !view_x +. d
       | _ -> ()
       end;
       moved := true; Lwt_unix.sleep 0.01 >>= aux)
