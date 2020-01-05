@@ -231,21 +231,21 @@ let compute_angle p1 p2 =
        x2 = Space.x_ p2 and
        y1 = Space.y_ p1 and
        y2 = Space.y_ p2 in
-     Space.angle_of_float (Float.atan ((y2 -. y1) /. (x2 -. x1)))
+     Space.angle_of_float (Float.atan2 (y2 -. y1)  (x2 -. x1))
 
 let plan visualize observation memory =
    let trees_pos = World.tree_positions observation.trees in
-let memory'=
+
   match memory.objective with
-   | Initializing -> let targets' = trees_pos in
-                     let objective' = GoingTo (targets', targets') in
+   | Initializing -> let targets' =trees_pos in
+                     let objective' = GoingTo ([List.hd targets'], [List.hd targets']) in
                      {memory with objective = objective' ; targets= targets'}
    | Chopping ->  memory(** let targets' = List.tl trees_pos in
                   let objective' = GoingTo(List.tl trees_pos, trees_pos) in
                     **)
 
    | GoingTo (p1,p2) ->  memory
-      in memory' 
+      
 
 (**
 
@@ -272,13 +272,15 @@ let next_action visualize observation memory =
                | None -> failwith("Chopping null tree!")
                | Some(t) -> t
             and targets' = List.tl memory.targets
-            in let tpos = List.hd targets' in
-            if(tree.branches = 0) then let objective' = GoingTo (targets', World.tree_positions observation.trees) in
+            in let tpos = if targets'=[] then observation.spaceship else List.hd targets' in
+            if(tree.branches <= 0) then let objective' = if targets'=[] then  GoingTo([observation.spaceship],[observation.spaceship]) else
+             GoingTo ([tpos], [tpos]) in
                (Wait , {memory with objective = objective' ; targets = targets'}) 
+               
             else (ChopTree , memory) 
       | GoingTo(p1 , p2) -> let t_pos = List.hd p1 in
-            if Space.close pos t_pos 1. then ChopTree, {memory with objective=Chopping}
-            else Move (compute_angle pos t_pos, Space.speed_of_float 1.), memory
+            if Space.close t_pos pos 1. then Move (compute_angle pos t_pos, Space.speed_of_float 0.), {memory with objective=Chopping}
+            else Move (compute_angle pos t_pos, observation.max_speed), memory
   
 (**
 
