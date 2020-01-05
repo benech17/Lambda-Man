@@ -243,7 +243,6 @@ let plan visualize observation memory =
    | Chopping ->  memory(** let targets' = List.tl trees_pos in
                   let objective' = GoingTo(List.tl trees_pos, trees_pos) in
                     **)
-
    | GoingTo (p1,p2) ->  memory
       
 
@@ -273,13 +272,11 @@ let next_action visualize observation memory =
                | Some(t) -> t
             and targets' = List.tl memory.targets
             in let tpos = if targets'=[] then observation.spaceship else List.hd targets' in
-            if(tree.branches <= 0) then let objective' = if targets'=[] then  GoingTo([observation.spaceship],[observation.spaceship]) else
-             GoingTo ([tpos], [tpos]) in
+            if(tree.branches <= 0) then let objective' =  GoingTo ([tpos], [tpos]) in
                (Wait , {memory with objective = objective' ; targets = targets'}) 
-               
             else (ChopTree , memory) 
       | GoingTo(p1 , p2) -> let t_pos = List.hd p1 in
-            if Space.close t_pos pos 1. then Move (compute_angle pos t_pos, Space.speed_of_float 0.), {memory with objective=Chopping}
+            if Space.close t_pos pos 1. then Move (observation.angle, Space.speed_of_float 0.), {memory with objective=Chopping}
             else Move (compute_angle pos t_pos, observation.max_speed), memory
   
 (**
