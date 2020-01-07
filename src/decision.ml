@@ -184,6 +184,41 @@ let discover visualize observation memory =
   { memory with known_world = Some known_world }
 
 
+  let distance a b =  match dist2 a b with |Distance(f) -> f 
+
+
+let get_hell_poly memory observation =  
+   let seen_world = World.world_of_observation observation in
+   match memory.known_world with
+   | None -> polygons  seen_world.space (fun p-> p = Hell)
+   | Some known_world -> polygons  known_world.space (fun p-> p = Hell)
+
+let get_ground_poly memory observation =  
+   let seen_world = World.world_of_observation observation in
+   match memory.known_world with
+   | None -> polygons  seen_world.space (fun p-> p != Hell)
+   | Some known_world -> polygons  known_world.space (fun p-> p != Hell)
+
+let hell_poly_list memory observation = List.map bounding_box_of_positions 
+      ((List.map Space.vertices (get_hell_poly memory observation) ))
+
+let ground_poly_list memory observation  = List.map bounding_box_of_positions 
+      ((List.map Space.vertices (get_ground_poly memory observation) ))
+
+
+
+let bounding_box_to_list lb = let b_to_list b = match b with
+   | ((x,y) , (x',y')) ->  let x=(min x x') -. 1. and x'=(max x x') +. 1. and y=(min y y') -. 1. and y'=(max y y') +. 1.
+   in [(x,y);(x',y');(x,y');(x',y)] in
+    List.map b_to_list lb     
+
+let get_hell_nodes memory observation = 
+      List.flatten (bounding_box_to_list (hell_poly_list memory observation))
+      
+
+let get_ground_list memory observation = 
+      List.flatten (bounding_box_to_list (ground_poly_list memory observation))
+
 (**
 
    Pour naviguer dans le monde, le robot construit une carte sous la
