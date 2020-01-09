@@ -186,38 +186,81 @@ let discover visualize observation memory =
 
   let distance a b =  match dist2 a b with |Distance(f) -> f 
 
-
-let get_hell_poly memory observation =  
-   let seen_world = World.world_of_observation observation in
-   match memory.known_world with
-   | None -> polygons  seen_world.space (fun p-> p = Hell)
-   | Some known_world -> polygons  known_world.space (fun p-> p = Hell)
-
-let get_ground_poly memory observation =  
-   let seen_world = World.world_of_observation observation in
-   match memory.known_world with
-   | None -> polygons  seen_world.space (fun p-> p != Hell)
-   | Some known_world -> polygons  known_world.space (fun p-> p != Hell)
-
-let hell_poly_list memory observation = List.map bounding_box_of_positions 
+  let get_hell_poly memory observation =  let kw_space = match memory.known_world with | Some(kw) -> kw.space | _ -> failwith("bad discovery") in
+    polygons  kw_space (fun p-> p = Hell)
+  
+  let get_ground_poly memory observation =  let kw_space = match memory.known_world with | Some(kw) -> kw.space | _ -> failwith("bad discovery") in
+    polygons  kw_space (fun p-> p != Hell)
+  
+  let hell_poly_list memory observation = List.map bounding_box_of_positions 
       ((List.map Space.vertices (get_hell_poly memory observation) ))
-
-let ground_poly_list memory observation  = List.map bounding_box_of_positions 
+  
+  let ground_poly_list memory observation  = List.map bounding_box_of_positions 
       ((List.map Space.vertices (get_ground_poly memory observation) ))
-
-
-
-let bounding_box_to_list lb = let b_to_list b = match b with
-   | ((x,y) , (x',y')) ->  let x=(min x x') -. 1. and x'=(max x x') +. 1. and y=(min y y') -. 1. and y'=(max y y') +. 1.
-   in [(x,y);(x',y');(x,y');(x',y)] in
+  
+  let bounding_box_to_list lb = let b_to_list b = match b with
+      | ((x,y) , (x',y')) ->  let x=(min x x') -. 1. and x'=(max x x') +. 1. and y=(min y y') -. 1. and y'=(max y y') +. 1.
+        in [(x,y);(x',y');(x,y');(x',y)] in
     List.map b_to_list lb     
-
-let get_hell_nodes memory observation = 
-      List.flatten (bounding_box_to_list (hell_poly_list memory observation))
-      
-
-let get_ground_list memory observation = 
-      List.flatten (bounding_box_to_list (ground_poly_list memory observation))
+  
+  let get_hell_nodes memory observation = 
+    List.flatten (bounding_box_to_list (hell_poly_list memory observation))
+  
+  let get_ground_list memory observation = 
+    List.flatten (bounding_box_to_list (ground_poly_list memory observation))
+  
+  let  get_nodes_list memory observation =
+    ( World.tree_positions observation.trees)@(get_hell_nodes memory observation ) @
+    (get_ground_list memory observation)@ [observation.position] @[observation.spaceship]
+  
+  (* renvoie les aret du graphe complet *)
+  let get_edges_list memory observation  =  
+    let get_couples l = let aux l x = List.map (fun e->(e,x)) l in
+      List.flatten (List.map (fun e-> aux l e) l) in
+    get_couples (get_nodes_list memory observation)
+  
+  (* a est un segment et l une liste de segments , si a insersete avec un element de l renvoi true*)
+  let has_intersection l a = List.exists (Space.segment_intersects a) l
+  
+  (* tout les segment qui s'interscte pas dans les deux liste s1 , s2 *)
+  
+  let hell_segments memory observation =   
+    match memory.known_world with
+    | None -> failwith("bad discovery")
+    | Some kw -> World.hell_segments kw 
+  
+  
+  
+  
+  
+  (* renvoi le pos d'intersection *)
+  let intersection_points seg1 seg2 =
+    match seg1 , seg2 with
+    | ((ax,ay) , (bx,by)) , ((cx,cy) , (dx,dy)) -> 
+      let r =  ( ((ay -.cy )*.(dx-.cx)) -.( (ax-.cx)*. (dy-.cy)  ) ) /. ( ((bx-.ax)*.(dy-.cy)) -.( (by -. ay)*. (dx-.cx)  ) ) in
+      ((ax +. (r *.(bx-.ax))),(ay+.(r *. (by -. ay))))
+  
+  
+  
+  let rec list_uniq l = match l with 
+    | e :: l' -> if List.mem e l' then list_uniq l' else e::list_uniq l'
+    | _ -> []
+  
+  
+  let point_intersect seg poly = 
+    (* la liste de tout les points d'intesect de seg avec poly_seg *)
+    let rec aux seg poly_seg =  match poly_seg  with 
+      | [] -> []
+      | e::l' ->  if (Space.segment_intersects seg e) then  (intersection_points seg e)::(aux seg l' ) else (aux seg l' ) in
+    list_uniq (aux seg (Space.polygon_segments poly))
+  
+  
+  (*renvoie tout les aretes qui passsent pas par l'enfer *)
+  let filtered_edges memory observation =
+    let no_passing_hell memory observation = let edges = get_edges_list memory observation and hell_seg = hell_segments memory observation in
+      List.filter (fun e-> not (has_intersection hell_seg e)) edges in
+  
+    List.map (fun x-> match x with |(a,b)-> (a,b,distance a b)) (no_passing_hell memory observation) 
 
 (**
 
@@ -232,8 +275,9 @@ let get_ground_list memory observation =
    sont les extremités ne croisent pas une bouche de l'enfer.
 
 *)
+
 let visibility_graph observation memory =
-  Graph.empty (* Students, this is your job! *)
+   Graph.make (get_nodes_list memory observation) (filtered_edges memory observation)
 
 
 (**
@@ -270,7 +314,7 @@ let compute_angle p1 p2 =
 
 let plan visualize observation memory =
    let trees_pos = World.tree_positions observation.trees in
-
+   let g = visibility_graph observation memory in
   match memory.objective with
    | Initializing -> let targets' =trees_pos in
                      let objective' = GoingTo ([List.hd targets'], [List.hd targets']) in
