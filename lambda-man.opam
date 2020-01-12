@@ -23,6 +23,7 @@ depends: [
   "lwt"
   "lwt_ppx"
   "graphics"
+  "camlimages"
   "cmdliner"
   "ppx_deriving_yojson"
   "ppx_inline_test"

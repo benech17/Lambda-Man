@@ -15,6 +15,7 @@ open World
 open Space
 open Graphics
 
+
 let res_x = ref 1024
 
 let res_y = ref 1024
@@ -66,9 +67,12 @@ let display_space space =
   |> List.iter display_polygon
 
 let display_tree { tree_position; branches } =
-  set_color (rgb 200 200 (min 255 (128 + branches)));
-  fill_circle (t_x (x_ tree_position)) (t_y (y_ tree_position)) (scale 5.)
-
+  (*let img=Png.load "png.png" [] in 
+  let g = Graphic_image.of_image img in
+  let pine = draw_image g 0 0 in*)
+  set_color (rgb 200 200 (min 255 (((branches*10) mod 135 + 120 ))));
+  fill_circle(t_x (x_ tree_position)) (t_y (y_ tree_position)) (scale 5.)
+  
 let screen_bounding_box positions =
   List.fold_left (fun ((x0, y0), (x1, y1)) (x, y) ->
       ((min x x0, min y y0), (max x x1, max y y1))
@@ -93,6 +97,7 @@ let display_robot world team_color robot  =
     let left = (x_ pos +. w *. cos al, y_ pos +. w *. sin al) in
     let right = (x_ pos +. w *. cos ar, y_ pos +. w *. sin ar) in
     if suffering world pos = 1. then set_color black else (set_color blue ; sound 0 0 );
+    fill_circle(t_x (x_ pos)) (t_y (y_ pos)) (scale 1.);
     save_background (screen_bounding_box [ t_ head; t_ left; t_ right ]);
     fill_poly [| t_ head; t_ left; t_ right |]
   end
@@ -178,11 +183,31 @@ let initialize new_world =
 let pause () = ignore (wait_next_event [Key_pressed])
 
 let show_info world =
-  set_color white;
-  fill_rect 0 0 100 50;
-  moveto 10 10;
+  set_color cyan;
+  fill_rect 0 0 205 135;
+  Graphics.set_font "-*-fixed-medium-r-semicondensed--20-*-*-*-*-*-iso8859-1";
   set_color black;
-  draw_string (Printf.sprintf "#trees : %d\n" (World.number_of_branches world))
+  moveto 40 108;
+  draw_string ("INFORMATIONS");
+  set_color black;
+  fill_rect 0 0 205 100;
+  moveto 10 70;
+  set_color white;
+  Graphics.set_font "-*-fixed-medium-r-semicondensed--15-*-*-*-*-*-iso8859-1";
+  let robot = if List.length world.teams>=1 then Some ( List.hd ((List.hd world.teams).robots) ) else None in
+  draw_string ( Printf.sprintf " Nb_branches_left  : %d " (number_of_branches world) );
+  moveto 10 50;
+  draw_string (Printf.sprintf  " Nb_arbres_visited : %d / %d " (nb_visited_trees world ) (List.length world.trees)) ;
+  moveto 10 30;
+  match robot with
+    | Some(r) ->   
+      draw_string (Printf.sprintf  " Robot_speed : %.1f " (  suffering world r.robot_position   *.(float_of_speed r.robot_speed) ));
+      moveto 10 10;
+      draw_string (Printf.sprintf  " Robot_energy : %d " (r.robot_energy) )
+
+    | None -> ()
+  
+
 
 let update force _old_world new_world =
   if not force then auto_synchronize false;

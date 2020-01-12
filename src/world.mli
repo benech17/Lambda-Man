@@ -93,6 +93,8 @@ val update_tree : t -> tree -> tree -> t
     dans [world]. *)
 val number_of_branches : t -> int
 
+val nb_visited_trees : t -> int
+
 (** [size_of_microcode m] est la taille d'un message. Plus un message est
     gros et plus il coûte cher à produire en termes d'énergie de robot. *)
 val size_of_microcode : microcode -> int

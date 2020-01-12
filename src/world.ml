@@ -78,8 +78,13 @@ let update_tree world tree tree' =
   let eq_tree t1 t2 = t1.tree_position = t2.tree_position in
   { world with trees = Ext.List.update eq_tree world.trees tree tree' }
 
+let nb_visited_trees world=
+    List.fold_left (fun a t -> a + if t.branches=0 then 1 else 0) 0 world.trees
+    
 let number_of_branches world =
   List.fold_left (fun a t -> a + t.branches) 0 world.trees
+
+
 
 let size_of_microcode m =
   let rec aux accu = function
