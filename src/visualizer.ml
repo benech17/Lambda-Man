@@ -92,7 +92,7 @@ let display_robot world team_color robot  =
     let head = (x_ pos +. h *. cos a, y_ pos +. h *. sin a) in
     let left = (x_ pos +. w *. cos al, y_ pos +. w *. sin al) in
     let right = (x_ pos +. w *. cos ar, y_ pos +. w *. sin ar) in
-    if suffering world pos = 1. then set_color black else set_color blue ;
+    if suffering world pos = 1. then set_color black else (set_color blue ; sound 0 0 );
     save_background (screen_bounding_box [ t_ head; t_ left; t_ right ]);
     fill_poly [| t_ head; t_ left; t_ right |]
   end
@@ -170,7 +170,6 @@ let bounding_box_world world =
 let initialize new_world =
   let bbox = bounding_box_world new_world in
   open_graph (Printf.sprintf " %dx%d" !res_x !res_y);
-  sound 440 100000;
   state := Some new_world;
   focus_on_box bbox;
   display new_world;
