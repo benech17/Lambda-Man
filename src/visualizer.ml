@@ -84,7 +84,7 @@ let restore_background () =
   List.iter (fun (x, y, i) -> draw_image i x y) !backgrounds;
   backgrounds := []
 
-let display_robot team_color robot =
+let display_robot world team_color robot  =
   if not robot.robot_down then begin
     let pos = robot.robot_position and a = float_of_angle robot.robot_angle in
     let al = a +. Float.pi /. 2. and ar = a -. Float.pi /. 2. in
@@ -92,7 +92,7 @@ let display_robot team_color robot =
     let head = (x_ pos +. h *. cos a, y_ pos +. h *. sin a) in
     let left = (x_ pos +. w *. cos al, y_ pos +. w *. sin al) in
     let right = (x_ pos +. w *. cos ar, y_ pos +. w *. sin ar) in
-    set_color team_color;
+    if suffering world pos = 1. then set_color black else set_color blue ;
     save_background (screen_bounding_box [ t_ head; t_ left; t_ right ]);
     fill_poly [| t_ head; t_ left; t_ right |]
   end
@@ -120,16 +120,17 @@ let random_color =
   let c = Array.init m Random.(fun _ -> rgb (int 240) (int 240) (int 240)) in
   fun i -> c.(i mod m)
 
-let display_team team =
+let display_team  w team =
   let team_color = random_color team.team_identifier in
   display_spaceship team_color team.spaceship;
-  List.iter (display_robot team_color) team.robots
+  List.iter (display_robot w team_color ) team.robots
 
 let display world =
   clear_graph ();
   display_space world.space;
   List.iter display_tree world.trees;
-  List.iter display_team world.teams
+  let f =(display_team world) in
+  List.iter f world.teams 
 
 let focus_on_box ((x0, y0), (x1, y1)) =
   let swidth = x1 -. x0 and sheight = y1 -. y0 in
@@ -169,6 +170,7 @@ let bounding_box_world world =
 let initialize new_world =
   let bbox = bounding_box_world new_world in
   open_graph (Printf.sprintf " %dx%d" !res_x !res_y);
+  sound 440 100000;
   state := Some new_world;
   focus_on_box bbox;
   display new_world;
@@ -190,7 +192,8 @@ let update force _old_world new_world =
     moved := false
   ) else (
     restore_background ();
-    List.iter display_team new_world.teams;
+    let f =(display_team new_world) in
+    List.iter f new_world.teams;
     List.iter display_microcode new_world.microcodes;
     state := Some new_world
   );
