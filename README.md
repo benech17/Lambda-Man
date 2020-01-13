@@ -11,8 +11,7 @@ Donc, pour montrer que tout le Lambda-man fonctionne, parfaitement dans le cadre
  - "basique" : avec les polygones initiaux , dans le fichier visualizer_basic.ml
  - " imagé " : avec les images et autres , dans le fichier visualizer.ml
 
-Il suffira donc de renommer les fichiers selon la version souhaitée dans src/.
-
+Il suffira donc de renommer le fichier  selon la version souhaitée  en visualizer.ml dans src/ .
 
 ## Taches accomplies
 
