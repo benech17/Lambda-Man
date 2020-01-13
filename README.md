@@ -14,7 +14,7 @@ Donc, pour montrer que tout le Lambda-man fonctionne, parfaitement dans le cadre
 Il suffira donc de renommer les fichiers selon la version souhaitée dans src/.
 
 
-##Taches accomplies
+## Taches accomplies
 
 Nous avons pris beaucoup de temps pour comprendre le code et le fonctionnement du jeu pour pouvoir nous lancer. Ensuite, nous sommes parvenus à implementer les aches   0, 1, 2, 3  dans un premier temps avant de rester bloquer et sans réussite finale malheureusement dans la tache 4.
 Nous avons également implementé la tache 6 comme expliqué plus haut.
