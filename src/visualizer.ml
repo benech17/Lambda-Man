@@ -54,12 +54,12 @@ let color_of_thing = function
 
 let display_polygon p =
   let bbox = bounding_box_of_positions  (vertices p) in
-  let pos = fst bbox in
+  let pos1 = fst bbox and pos2 = snd bbox in
   let adr = 
   match content p with 
   | Hell -> "./images/fire.png"
   | _ -> "./images/cyclone.png" in
-  let img = Png.load adr []  in Graphic_image.draw_image img (t_x (x_ pos  )  ) (t_y (y_ pos  ))
+  let img = Png.load adr []  in Graphic_image.draw_image img (t_x (x_ pos1  )  ) (t_y (y_ pos1  ))
  
 
 
