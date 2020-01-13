@@ -8,6 +8,7 @@
 
 open World
 
+
 let default_end_of_time =
   100000
 
@@ -54,10 +55,10 @@ let simple_world nb_players nb_robots_per_team max_hell max_ground max_tree =
   let make_tree space _ =
     let tree_position = random_position space in
     let branches = Ext.Int.random_in_range 2 20 in
-    { tree_position; branches }
-  in
-  let make_team space team_identifier =
-    let spaceship = random_position space in
+    { tree_position; branches } in
+
+  let make_team pos space team_identifier =
+    let spaceship = match pos with | Some(p) -> p | None -> random_position space in
     let make_robot id =
       make_robot id team_identifier spaceship (random_angle ())
     in
@@ -65,17 +66,62 @@ let simple_world nb_players nb_robots_per_team max_hell max_ground max_tree =
       robots = Ext.Fun.repeat nb_robots_per_team make_robot }
   in
 
+
+
+  let create_cross pos = 
+    let a1 = Space.rectangle (pos) (600.) (40.) Hell and a2 = Space.rectangle (pos) (40.) (600.) Hell in [a1;a2]
+  in
+
+  let x_ = fst and y_ = snd in
+
+    
+  let create_hell pos= 
+    let rec auxc l space = match l with 
+    |[]-> space 
+    |x::xs-> auxc xs Space.(blend space (polygon x)) in
+
+  
+
+    (* let s1 = Space.square (pos) (100.) Hell and s2 = Space.square ((x_ pos +. 100. , y_ pos)) (100.) Hell
+    and s3 = Space.square ((x_ pos +. 200. , y_ pos)) (100.) Hell and s4 = Space.square ((x_ pos +. 300. , y_ pos)) (100.) Hell
+    and s5 = Space.square ((x_ pos +. 400. , y_ pos)) (100.) Hell and s6 = Space.square ((x_ pos +. 500. , y_ pos)) (100.) Hell  *)
+    (* and s6 = Space.square ((x_ pos +. 400. , y_ pos +. 100.)) (100.) Hell and s7 = Space.square ((x_ pos +. 400. , y_ pos +. 200.)) (100.) Hell 
+    and s8 = Space.square ((x_ pos +. 400. , y_ pos +. 300.)) (100.) Hell
+    and s9 = Space.square ((x_ pos +. 400. , y_ pos +. 400.)) (100.) Hell
+    and s10 = Space.square ((x_ pos , y_ pos +. 100.)) (100.) Hell
+    and s11 = Space.square ((x_ pos  , y_ pos +. 200.)) (100.) Hell
+    and s12 = Space.square ((x_ pos  , y_ pos +. 300.)) (100.) Hell
+    and s13 = Space.square ((x_ pos  , y_ pos +. 400.)) (100.) Hell *)
+
+     auxc (create_cross pos) Space.empty 
+  in
+
+  let create_single_tree pos = 
+    let branches = Ext.Int.random_in_range 2 20 and tree_position =pos in
+      { tree_position ; branches}
+
+  in
+
+
   let nb_hell = Ext.Int.random_in_range 1 max_hell in
-  let space = Ext.Fun.iter nb_hell make_hell Space.empty in
+
+  let random_pos = random_position Space.empty in
+  let nb_hell = Ext.Int.random_in_range 1 max_hell in
+  let space = create_hell random_pos in
+    let space = Ext.Fun.iter nb_hell make_hell space in  
   let nb_grounds = Ext.Int.random_in_range 1 max_ground in
   let space = Ext.Fun.iter nb_grounds make_ground space in
   let nb_trees = Ext.Int.random_in_range 1 max_tree in
-  let trees = Ext.Fun.repeat nb_trees (make_tree space) in
-  let teams = Ext.Fun.repeat nb_players (make_team space) in
+  (* let trees = Ext.Fun.repeat nb_trees (make_tree space) in *)
+  let trees = [create_single_tree (x_ random_pos -. 150. , y_ random_pos +. 150.)] in
+  let spos =  (x_ random_pos +. 250. , y_ random_pos -. 150.) in
+  let teams = Ext.Fun.repeat nb_players (make_team (Some(spos)) space) in
   { initial with space; trees; teams }
 
 let output world =
   to_yojson world |> Yojson.Safe.pretty_to_string |> output_string stdout
+
+
 
 let generate
       visualize nb_players nb_robots_per_teams
