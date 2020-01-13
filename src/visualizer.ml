@@ -51,9 +51,17 @@ let color_of_thing = function
      let c = int_of_float (float_of_int 255 *. f) in
      rgb c c c
 
+
 let display_polygon p =
-  set_color (color_of_thing (Space.content p));
-  fill_poly (List.map t_ (Space.vertices p) |> Array.of_list)
+  let bbox = bounding_box_of_positions  (vertices p) in
+  let pos = fst bbox in
+  let adr = 
+  match content p with 
+  | Hell -> "./images/fire.png"
+  | _ -> "./images/cyclone.png" in
+  let img = Png.load adr []  in Graphic_image.draw_image img (t_x (x_ pos  )  ) (t_y (y_ pos  ))
+ 
+
 
 let ground_first t1 t2 =
   match content t1, content t2 with
@@ -67,11 +75,8 @@ let display_space space =
   |> List.iter display_polygon
 
 let display_tree { tree_position; branches } =
-  (*let img=Png.load "png.png" [] in 
-  let g = Graphic_image.of_image img in
-  let pine = draw_image g 0 0 in*)
-  set_color (rgb 200 200 (min 255 (((branches*10) mod 135 + 120 ))));
-  fill_circle(t_x (x_ tree_position)) (t_y (y_ tree_position)) (scale 5.)
+  let img = Png.load "./images/treet.png" [] in
+  Graphic_image.draw_image img (t_x (x_ tree_position -. 10. )  ) (t_y (y_ tree_position -. 10. ))
   
 let screen_bounding_box positions =
   List.fold_left (fun ((x0, y0), (x1, y1)) (x, y) ->
@@ -98,9 +103,13 @@ let display_robot world team_color robot  =
     let right = (x_ pos +. w *. cos ar, y_ pos +. w *. sin ar) in
     if suffering world pos = 1. then set_color black else (set_color blue ; sound 0 0 );
     fill_circle(t_x (x_ pos)) (t_y (y_ pos)) (scale 1.);
+    (* let img = Png.load "./images/lumber.png" [] in
+    Graphic_image.draw_image img (t_x (x_ pos -. 10. )  ) (t_y (y_ pos -. 10. )); *)
+
     save_background (screen_bounding_box [ t_ head; t_ left; t_ right ]);
     fill_poly [| t_ head; t_ left; t_ right |]
   end
+  
 
 let display_microcode m =
   let pos = m.microcode_position in
@@ -115,10 +124,8 @@ let display_microcode m =
   fill_circle (t_x (x_ pos)) (t_y (y_ pos)) (scale d)
 
 let display_spaceship team_color pos =
-  let d = 5. and d' = 10. in
-  set_color team_color;
-  fill_circle (t_x (x_ pos)) (t_y (y_ pos)) (scale d);
-  draw_rect (t_x (x_ pos -. d)) (t_y (y_ pos -. d)) (scale d') (scale d')
+  let img = Png.load "./images/spaceship.png" [] in
+    Graphic_image.draw_image img (t_x (x_ pos )  ) (t_y (y_ pos ))
 
 let random_color =
   let m = 100 in
