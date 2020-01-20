@@ -70,30 +70,40 @@ let simple_world nb_players nb_robots_per_team max_hell max_ground max_tree =
 
   let create_cross pos = 
     let a1 = Space.rectangle (pos) (600.) (40.) Hell and a2 = Space.rectangle (pos) (40.) (600.) Hell in [a1;a2]
+    
   in
 
   let x_ = fst and y_ = snd in
 
-    
+  let create_lab pos = 
+    let s1 = Space.rectangle (pos) (900.) (15.) Hell and s2 = Space.rectangle ((x_ pos , y_ pos +. 200.)) (900.) (15.) Hell
+    and s3 = Space.rectangle ((x_ pos -. 450., y_ pos +. 80. )) (15.) (170.) Hell
+    and s4 = Space.rectangle ((x_ pos -. 400., y_ pos +. 120.)) (15.) (170.) Hell
+    and s5 = Space.rectangle ((x_ pos -. 350., y_ pos +. 80.)) (15.) (170.) Hell
+    and s6 = Space.rectangle ((x_ pos -. 300., y_ pos +. 120.)) (15.) (170.) Hell
+    and s7 = Space.rectangle ((x_ pos -. 250., y_ pos +. 80.)) (15.) (170.) Hell
+    and s8 = Space.rectangle ((x_ pos -. 200., y_ pos +. 120.)) (15.) (170.) Hell
+    and s9 = Space.rectangle ((x_ pos -. 150., y_ pos +. 80.)) (15.) (170.) Hell
+    and s10 = Space.rectangle ((x_ pos -. 100., y_ pos +. 120.)) (15.) (170.) Hell
+    and s11 = Space.rectangle ((x_ pos -. 50., y_ pos +. 80.)) (15.) (170.) Hell
+    and s12 = Space.rectangle ((x_ pos , y_ pos +. 120.)) (15.) (170.) Hell
+    and s13 = Space.rectangle ((x_ pos +. 50. , y_ pos +. 80.)) (15.) (170.) Hell
+
+    and s14 = Space.rectangle ((x_ pos +. 150. , y_ pos +. 120.)) (7.) (180.) Hell
+    and s15 = Space.rectangle ((x_ pos +. 170., y_ pos +. 80.)) (7.) (180.) Hell 
+    and s16 = Space.rectangle ((x_ pos +. 190., y_ pos +. 120.)) (7.) (180.) Hell
+
+    and s17 = Space.rectangle ((x_ pos +. 450., y_ pos +. 80.)) (15.) (170.) Hell
+    and s18 = Space.rectangle ((x_ pos +. 400. , y_ pos -. 80.)) (15.) (170.) Hell
+
+    in [s1;s2;s3;s4;s5;s6;s7;s8;s9;s10;s11;s12;s13;s14;s15;s16;s17;s18] in
+
   let create_hell pos= 
     let rec auxc l space = match l with 
     |[]-> space 
     |x::xs-> auxc xs Space.(blend space (polygon x)) in
 
-  
-
-    (* let s1 = Space.square (pos) (100.) Hell and s2 = Space.square ((x_ pos +. 100. , y_ pos)) (100.) Hell
-    and s3 = Space.square ((x_ pos +. 200. , y_ pos)) (100.) Hell and s4 = Space.square ((x_ pos +. 300. , y_ pos)) (100.) Hell
-    and s5 = Space.square ((x_ pos +. 400. , y_ pos)) (100.) Hell and s6 = Space.square ((x_ pos +. 500. , y_ pos)) (100.) Hell  *)
-    (* and s6 = Space.square ((x_ pos +. 400. , y_ pos +. 100.)) (100.) Hell and s7 = Space.square ((x_ pos +. 400. , y_ pos +. 200.)) (100.) Hell 
-    and s8 = Space.square ((x_ pos +. 400. , y_ pos +. 300.)) (100.) Hell
-    and s9 = Space.square ((x_ pos +. 400. , y_ pos +. 400.)) (100.) Hell
-    and s10 = Space.square ((x_ pos , y_ pos +. 100.)) (100.) Hell
-    and s11 = Space.square ((x_ pos  , y_ pos +. 200.)) (100.) Hell
-    and s12 = Space.square ((x_ pos  , y_ pos +. 300.)) (100.) Hell
-    and s13 = Space.square ((x_ pos  , y_ pos +. 400.)) (100.) Hell *)
-
-     auxc (create_cross pos) Space.empty 
+     auxc (create_lab pos) Space.empty 
   in
 
   let create_single_tree pos = 
@@ -108,13 +118,13 @@ let simple_world nb_players nb_robots_per_team max_hell max_ground max_tree =
   let random_pos = random_position Space.empty in
   let nb_hell = Ext.Int.random_in_range 1 max_hell in
   let space = create_hell random_pos in
-    let space = Ext.Fun.iter nb_hell make_hell space in  
+    (* let space = Ext.Fun.iter nb_hell make_hell space in   *)
   let nb_grounds = Ext.Int.random_in_range 1 max_ground in
   let space = Ext.Fun.iter nb_grounds make_ground space in
   let nb_trees = Ext.Int.random_in_range 1 max_tree in
   (* let trees = Ext.Fun.repeat nb_trees (make_tree space) in *)
-  let trees = [create_single_tree (x_ random_pos -. 150. , y_ random_pos +. 150.)] in
-  let spos =  (x_ random_pos +. 250. , y_ random_pos -. 150.) in
+  let trees = [create_single_tree (x_ random_pos +. 550. , y_ random_pos +. 50.)] in
+  let spos =  (x_ random_pos -. 550. , y_ random_pos +. 100.) in
   let teams = Ext.Fun.repeat nb_players (make_team (Some(spos)) space) in
   { initial with space; trees; teams }
 
