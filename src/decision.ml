@@ -173,7 +173,7 @@ let initial_memory = {
 
 (** [discover] met à jour [memory] en prenant en compte les nouvelles
     observations. *)
-let discover visualize observation memory =
+let discover visualize graphic observation memory =
   let seen_world = World.world_of_observation observation in
   let known_world =
     match memory.known_world with
@@ -181,6 +181,7 @@ let discover visualize observation memory =
     | Some known_world -> World.extends_world known_world seen_world
   in
   if visualize then Visualizer.show ~force:true known_world;
+  if graphic then VisualizerGraphic.show ~force:true known_world;
   { memory with known_world = Some known_world }
 
 
@@ -432,7 +433,7 @@ let rec ground_segments polyList =
   | [] -> []
   | x::xs -> (Space.polygon_segments x)@ground_segments xs
 
-let plan visualize observation memory =
+let plan visualize graphic observation memory =
   let graphe = visibility_graph observation memory in
   match memory.objective with
   | Initializing -> let targets' = ( World.tree_positions observation.trees) in
@@ -481,7 +482,7 @@ let compute_angle p1 p2 =
   y2 = Space.y_ p2 in
   Space.angle_of_float (Float.atan2 (y2 -. y1)  (x2 -. x1))
 
-let next_action visualize observation memory =
+let next_action visualize graphic observation memory =
   let pos = observation.position in
   match memory.objective with
   | Initializing -> failwith("not a good robot")
@@ -495,7 +496,7 @@ let next_action visualize observation memory =
         (Wait , {memory with objective = objective' ; targets = targets'}) 
       else (ChopTree , memory) 
 
-| GoingTo (p1,p2) -> let pos = observation.position and t_pos = List.hd p1 and branche_nb = match tree_at observation.trees pos with
+  | GoingTo (p1,p2) -> let pos = observation.position and t_pos = List.hd p1 and branche_nb = match tree_at observation.trees pos with
       | None -> 0 | Some(n) -> n.branches and new_path = if List.length p1 = 1 then p1 else List.tl p1 in
       
       if(branche_nb > 0) then Move (observation.angle, Space.speed_of_float 0.), {memory with objective=Chopping} else
@@ -511,8 +512,13 @@ let next_action visualize observation memory =
    des trois fonctions du dessus.
 
 *)
-let decide visualize observation memory : action * memory =
-  let memory = discover visualize observation memory in
-  let memory = plan visualize observation memory in
-  let () = Visualizer.show_graph memory.graph in
-  next_action visualize observation memory
+
+(*visualize pour GUI simple et graphic pour GUI complexe*)
+
+let decide visualize graphic observation memory : action * memory =
+  let memory = discover visualize graphic observation memory in
+  let memory = plan visualize graphic observation memory in
+  
+  let () =if visualize then Visualizer.show_graph memory.graph else 
+    VisualizerGraphic.show_graph memory.graph in
+  next_action visualize graphic observation memory

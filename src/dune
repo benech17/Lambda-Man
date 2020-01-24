@@ -5,7 +5,7 @@
  (flags :standard -w -27-26-32)
  (preprocess (pps ppx_deriving_yojson lwt_ppx ppx_inline_test))
  (modules graph lambdaMan lambdaServer
-          world worldGenerator visualizer communication decision space game
+          world worldGenerator visualizer visualizerGraphic communication decision space game
           priorityQueue ext \ lambdaDriver
   )
  (libraries cmdliner lwt lwt.unix yojson ppx_deriving_yojson graphics threads.posix camlimages.png camlimages.graphics)

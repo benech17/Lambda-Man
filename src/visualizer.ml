@@ -67,11 +67,8 @@ let display_space space =
   |> List.iter display_polygon
 
 let display_tree { tree_position; branches } =
-  (*let img=Png.load "png.png" [] in 
-  let g = Graphic_image.of_image img in
-  let pine = draw_image g 0 0 in*)
-  set_color (rgb 200 200 (min 255 (((branches*10) mod 135 + 120 ))));
-  fill_circle(t_x (x_ tree_position)) (t_y (y_ tree_position)) (scale 5.)
+  let img = Png.load "./images/treet.png" [] in
+  Graphic_image.draw_image img (t_x (x_ tree_position -. 10. )  ) (t_y (y_ tree_position -. 10. ))
   
 let screen_bounding_box positions =
   List.fold_left (fun ((x0, y0), (x1, y1)) (x, y) ->

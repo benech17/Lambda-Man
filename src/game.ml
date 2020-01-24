@@ -26,7 +26,10 @@ open Printf
    c'est-à-dire des calculs qui s'exécutent de façon asynchrones.
 
 *)
-let loop visualize slowdown world clients =
+
+(*visualize pour GUI simple et graphic pour GUI complexe*)
+
+let loop visualize graphic slowdown world clients =
   (**
 
       Associe une équipe à chaque client.
@@ -46,7 +49,8 @@ let loop visualize slowdown world clients =
   *)
   let rec animate world =
     let over = game_over world in
-    if visualize then Visualizer.show world;
+    if visualize then Visualizer.show world ;
+    if graphic then VisualizerGraphic.show world;
     let%lwt world', interactions = World.forall_robot world (act over) in
     let%lwt world' = interact interactions world' in
     let%lwt world' = move world' in

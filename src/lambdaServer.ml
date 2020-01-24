@@ -4,15 +4,18 @@
 
 *)
 
-let run world_filename client_commands visualize slowdown =
+let run world_filename client_commands visualize graphic slowdown =
   let world = World.load world_filename in
   let clients = List.mapi Communication.server client_commands in
-  Lwt_main.run (Game.loop visualize slowdown world clients)
+  Lwt_main.run (Game.loop visualize graphic slowdown world clients)
 
 open Cmdliner
 
 let visualization_flag =
   Arg.(value & flag & info ["v"] ~doc:"Visualize the game graphically")
+
+let graphic_flag =
+  Arg.(value & flag & info ["g"] ~doc:"Visualize the game with images and graphics")
 
 let clients =
   Arg.(value
@@ -32,5 +35,5 @@ let slowdown =
 let cmd =
   let doc = "Play a game with lambda-men." in
   let exits = Term.default_exits in
-  Term.(const run $ world $ clients $ visualization_flag $ slowdown),
+  Term.(const run $ world $ clients $ visualization_flag $ graphic_flag $ slowdown),
   Term.info "server" ~doc ~exits
