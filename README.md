@@ -1,8 +1,8 @@
 # Lambda-man
 
 Projet de programmation fonctionnelle 2019 réalisé par :
-    Benichou yaniv 
-    Ansari Tabrizi Arwin Edwin
+    -Benichou yaniv  
+    -Ansari Tabrizi Arwin Edwin
 
 
 ## Deux formats de visualisation (tache 6)
@@ -13,7 +13,7 @@ Donc, pour montrer que tout le Lambda-man fonctionne, parfaitement dans le cadre
 lors de la compilation par des options "-g" que nous avons ajoutées. 
 Ainsi,avec l'option -g ,nous profiterons d'un affichage graphique bien meilleur dont le code se trouve dans le fichier "visualizer_graphic.ml"
 
-## Taches accomplies (1, 2, 3, 4)
+## Taches accomplies (tache 1, 2, 3, 4, 5)
 
 Nous avons pris beaucoup de temps pour comprendre le code et le fonctionnement du jeu pour pouvoir nous lancer. Ensuite, nous sommes parvenus à implementer les taches   0, 1, 2, 3, 4  .
 Aussi, la tache 5 nous nous sommes amusés à créer differents mondes, 2 de types "labyrinthes" et 2 autres de types "cross" que nous pensont pouvir être assez piégeux. 
