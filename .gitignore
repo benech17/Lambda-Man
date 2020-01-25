@@ -3,4 +3,5 @@ _build/
 lambda
 src/.merlin
 src/decision*.ml
+images/*jpg
 

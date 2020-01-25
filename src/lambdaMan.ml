@@ -14,7 +14,7 @@ let run visualize graphic max_duration nb =
   let robot i =
     Lwt_preemptive.detach (fun observation ->
         if observation.World.game_over then exit 0 else
-        let action, memory = Decision.decide visualize graphic observation robots.(i) in
+        let action, memory = Decision.decide visualize graphic observation {robots.(i) with id=i} in
         robots.(i) <- memory;
         action
     )

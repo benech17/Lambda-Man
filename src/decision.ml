@@ -140,6 +140,8 @@ type memory = {
   graph       : Graph.t;             (** Un graphe qui sert de carte.     *)
   objective   : objective;           (** L'objectif courant du robot.     *)
   targets     : Space.position list; (** Les points où il doit se rendre. *)
+  id : int;                          (** L'identifiant du robot           *)
+  is_init : bool;                    (** Si il est initaliser ou pas      *)
 }
 
 (**
@@ -153,6 +155,8 @@ let initial_memory = {
   graph       = Graph.empty;
   objective   = Initializing;
   targets     = [];
+  id = 0;
+  is_init = false;
 }
 
 (**
@@ -224,9 +228,17 @@ let get_hell_nodes memory observation =
 let get_ground_list memory observation = 
   List.flatten (bounding_box_to_list (ground_poly_list memory observation))
 
+
 let get_nodes_list memory observation =
+
+  let kw_space = match memory.known_world with | Some(kw) -> kw.space | _ -> failwith("bad discovery") in
+  let pl = polygons  kw_space (fun p-> true) in
+  let l = 
   ( World.tree_positions observation.trees)@(get_hell_nodes memory observation ) @
-  (get_ground_list memory observation)@ [observation.position] @[observation.spaceship]
+  (get_ground_list memory observation) @[observation.spaceship]@ [observation.position] in l
+
+  (* (List.filter (fun n -> not (List.exists (inside_polygon n) pl) ) l)@ [observation.position] *)
+
 
 (* renvoie les aret du graphe complet *)
 let get_edges_list memory observation  =  
@@ -377,9 +389,9 @@ let calc_center a b =
 
 (* ground poly: liste de polygon - *)
 (*intersectionPoints: l'intersection de (a,b) avec tout les segment d'un polygon de la liste groundPoly*)
-let rec update_weight a b w groundPoly observation world =
+let rec update_weight a b w  groundPoly observation world =
   match groundPoly with 
-  | [] -> (a,b,w)
+  | [] -> (a,b, w)
   | x::xs -> 
     let intersectionPoints = (point_intersect (a,b) x ) in
     if ( List.length intersectionPoints = 2 ) then
@@ -388,15 +400,15 @@ let rec update_weight a b w groundPoly observation world =
       let milieu = calc_center point1 point2 in  
       let suffering = World.suffering world milieu in 
       let new_weight = calc_weight a b point1 point2 w suffering (distance point1 point2) in
-      update_weight a b new_weight xs observation world
-    else update_weight a b w xs observation world
+      update_weight a b new_weight  xs observation world
+    else update_weight a b w  xs observation world
 
 (* actualise la liste des sommmet en prenant en compte les champs de soufrence*)
 let rec new_edges edgesList groundPoly ground_seg observation world =  
   match edgesList with 
   | [] -> [] 
   | (a,b,w)::xs -> 
-    if (has_intersection  ground_seg (a,b)) then (update_weight a b w groundPoly observation world)::new_edges xs groundPoly ground_seg observation world
+    if (has_intersection  ground_seg (a,b)) then (update_weight a b w  groundPoly observation world)::new_edges xs groundPoly ground_seg observation world
     else (a,b,w)::new_edges xs groundPoly ground_seg observation world
 
 
@@ -436,9 +448,9 @@ let rec ground_segments polyList =
 let plan visualize graphic observation memory =
   let graphe = visibility_graph observation memory in
   match memory.objective with
-  | Initializing -> let targets' = ( World.tree_positions observation.trees) in
-      let objective' = GoingTo([List.hd targets'],[observation.position]) in
-      {memory with graph = graphe ; objective = objective'; targets = targets'}
+  | Initializing ->  let targets' = ( World.tree_positions observation.trees) in
+        {memory with graph = graphe; targets= targets'}
+
   | Chopping -> memory
 
   | GoingTo (p1,p2) -> 
@@ -474,6 +486,11 @@ let plan visualize graphic observation memory =
 
 *)
 
+let rec micro_index micro_list id acc = match micro_list with
+  | [] -> failwith("index of id not found in micro_list")
+  | x :: xs -> match x.microcode with 
+      | MicroAtom(i) -> if i=id then acc else micro_index xs id (acc+1)
+      | _ -> micro_index xs id (acc+1)
 
 let compute_angle p1 p2 = 
   let x1 = Space.x_ p1 and
@@ -482,11 +499,40 @@ let compute_angle p1 p2 =
   y2 = Space.y_ p2 in
   Space.angle_of_float (Float.atan2 (y2 -. y1)  (x2 -. x1))
 
+
+
+let rec sublist b e l = 
+  match l with
+    [] -> failwith "sublist"
+  | h :: t -> 
+     let tail = if e=0 then [] else sublist (b-1) (e-1) t in
+     if b>0 then tail else h :: tail
+
+
+let split_targets observation memory n i = let t = memory.targets in let nb_t = List.length t and
+   pos = observation.position in
+   let cut = nb_t / n and rest_cut = nb_t mod n in
+   let targets' =if i !=0 then sublist (i*cut) ((i+1)*(cut) -1) t else
+   (sublist (i*cut) ((i+1)*(cut) -1) t) @ (sublist (nb_t - rest_cut) (nb_t -1) t) in
+   let objective' = GoingTo([List.hd targets'],[observation.position]) in
+   Move (compute_angle pos (List.hd targets'), observation.max_speed) , {memory with objective = objective'; targets=targets'}
+  
+
 let next_action visualize graphic observation memory =
   let pos = observation.position in
   match memory.objective with
-  | Initializing -> failwith("not a good robot")
   
+  | Initializing -> let id = memory.id and micro_list = observation.messages in
+
+      let nb_micro = List.length micro_list in
+      if nb_micro != 0 then
+        let index = micro_index micro_list id 0 in
+        if memory.is_init then
+          split_targets observation memory nb_micro index
+        else Move (observation.angle, Space.speed_of_float 0.) , memory
+      else
+        Put( MicroAtom id, duration_of_int 100 ) , {memory with is_init=true}
+
   | Chopping ->  let tree= match World.tree_at observation.trees pos with
         | None -> failwith("Chopping null tree!")
         | Some(t) -> t
@@ -497,13 +543,12 @@ let next_action visualize graphic observation memory =
       else (ChopTree , memory) 
 
   | GoingTo (p1,p2) -> let pos = observation.position and t_pos = List.hd p1 and branche_nb = match tree_at observation.trees pos with
-      | None -> 0 | Some(n) -> n.branches and new_path = if List.length p1 = 1 then p1 else List.tl p1 in
+      | None -> 0 | Some(n) -> n.branches 
+      and new_path = if List.length p1 = 1 then p1 else List.tl p1 in
       
       if(branche_nb > 0) then Move (observation.angle, Space.speed_of_float 0.), {memory with objective=Chopping} else
       if Space.close t_pos pos 1. then Move (compute_angle pos (List.hd new_path) , observation.max_speed) , {memory with objective=GoingTo( new_path , [pos]) }
       else Move (compute_angle pos t_pos, observation.max_speed), memory 
-
-
 
 
 (**

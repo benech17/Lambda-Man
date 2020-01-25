@@ -95,6 +95,8 @@ val bounding_box_union : bounding_box -> bounding_box -> bounding_box
     [poly] chevauche un polygone de [space] de contenu vérifiant [p]. *)
 val polygon_overlaps : 'a polygon -> 'a t -> ('a -> bool) -> bool
 
+val inside_polygon : position -> 'a polygon -> bool
+
 (** On peut extraire l'ensemble des polygones d'un plan qui sont inclus dans
     une boîte. *)
 val space_inside : bounding_box -> 'a t -> 'a t
