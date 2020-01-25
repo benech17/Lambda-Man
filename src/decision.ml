@@ -503,7 +503,7 @@ let compute_angle p1 p2 =
 
 let rec sublist b e l = 
   match l with
-    [] -> failwith "sublist"
+  | [] -> []
   | h :: t -> 
      let tail = if e=0 then [] else sublist (b-1) (e-1) t in
      if b>0 then tail else h :: tail
@@ -512,9 +512,13 @@ let rec sublist b e l =
 let split_targets observation memory n i = let t = memory.targets in let nb_t = List.length t and
    pos = observation.position in
    let cut = nb_t / n and rest_cut = nb_t mod n in
-   let targets' =if i !=0 then sublist (i*cut) ((i+1)*(cut) -1) t else
+   let targets' =if cut=0 && i=0 then memory.targets else if cut=0 then [observation.spaceship] else if i !=0 then sublist (i*cut) ((i+1)*(cut) -1) t else
    (sublist (i*cut) ((i+1)*(cut) -1) t) @ (sublist (nb_t - rest_cut) (nb_t -1) t) in
    let objective' = GoingTo([List.hd targets'],[observation.position]) in
+
+   if cut=0 then  Wait , {memory with objective = objective'; targets=targets'}
+  
+  else
    Move (compute_angle pos (List.hd targets'), observation.max_speed) , {memory with objective = objective'; targets=targets'}
   
 
@@ -550,6 +554,7 @@ let next_action visualize graphic observation memory =
       else if(branche_nb > 0) then Move (observation.angle, Space.speed_of_float 0.), {memory with objective=Chopping} else
       if Space.close t_pos pos 1. then Move (compute_angle pos (List.hd new_path) , observation.max_speed) , {memory with objective=GoingTo( new_path , [pos]) }
       else Move (compute_angle pos t_pos, observation.max_speed), memory 
+
 
 
 (**
