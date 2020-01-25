@@ -546,7 +546,8 @@ let next_action visualize graphic observation memory =
       | None -> 0 | Some(n) -> n.branches 
       and new_path = if List.length p1 = 1 then p1 else List.tl p1 in
       
-      if(branche_nb > 0) then Move (observation.angle, Space.speed_of_float 0.), {memory with objective=Chopping} else
+      if(t_pos = observation.spaceship && Space.close t_pos pos 1.) then Move (observation.angle, Space.speed_of_float 0.), memory
+      else if(branche_nb > 0) then Move (observation.angle, Space.speed_of_float 0.), {memory with objective=Chopping} else
       if Space.close t_pos pos 1. then Move (compute_angle pos (List.hd new_path) , observation.max_speed) , {memory with objective=GoingTo( new_path , [pos]) }
       else Move (compute_angle pos t_pos, observation.max_speed), memory 
 
