@@ -1,21 +1,19 @@
 # Lambda-man
+## How to use : Lambda Man 
+To use this project,make sure you are working on a GNU/Linux distribution and have installed Opam 2. <br>
+then `$ ./configure ` will install all the project dependancies on a Opam installation. <br>
+If everything went well , you will have the following message : <br>
 
-Projet de programmation fonctionnelle 2019 réalisé par :
-    -Benichou yaniv  
-    -Ansari Tabrizi Arwin Edwin
+> Congratulations! Your project is ready for development.
 
+Now, you can compile with `$ make` and it will create an executable file called "lambda". <br>
+Finally,you can launch the game with : 
 
-## Deux formats de visualisation (tache 6)
+`./lambda server -s 0.01 -v -w tests/00015-hell-and-suffering.json './lambda man -n 1  -v' `<br>
+as :
+* the server is going to use the world "00015-hell-and-suffering.json" in the "tests/" repository where there are 20 others worlds to test. (4 others personalized worlds are available in the "myworld/" repository)
+* The option " -s 0.1 " tells the server to wait 0.1 sec before any action but we can replace it by another value like 0.001 to go faster.
+* The option "-v" refers to a basic graphic version with arrow and recangles but you can replace it with " -g " to get some images.
+* Then the server will execute the command in simple quote , './lambda man -n 1 -v' where the option "-n 1" refers to the number of robot to use and " -v " refers to the same option as precedent point.
 
-Dans le cadre de la tâche 6 , nous avons essayé d'améliorer au mieux le visuel du Lambda-man et vous pourrez retrouvez ce fichier sous le nom de visualizer.ml (comme demandé).
-Cependant, les images que nous avons mises ne peuvent pas être dynamique et donc il arrive parfois qu'une image puisse etre trop grande ou trop petite en fonction du zoom par exemple.
-Donc, pour montrer que tout le Lambda-man fonctionne, parfaitement dans le cadre des 3 premieres taches, nous laissons le choix à l'utilisateur de choisir l'affichage  en remplacant les options -v 
-lors de la compilation par des options "-g" que nous avons ajoutées. 
-Ainsi,avec l'option -g ,nous profiterons d'un affichage graphique bien meilleur dont le code se trouve dans le fichier "visualizer_graphic.ml"
-
-## Taches accomplies (tache 1, 2, 3, 4, 5)
-
-Nous avons pris beaucoup de temps pour comprendre le code et le fonctionnement du jeu pour pouvoir nous lancer. Ensuite, nous sommes parvenus à implementer les taches   0, 1, 2, 3, 4  .
-Aussi, la tache 5 nous nous sommes amusés à créer differents mondes, 2 de types "labyrinthes" et 2 autres de types "cross" que nous pensont pouvir être assez piégeux. 
-Nous avons également implementé la tache 6 comme expliqué plus haut.
 
