@@ -1,4 +1,4 @@
-# Lambda-man - Functional programming project implemented in Ocaml.
+# Lambda man 
 A Lambda man is a robot which is launched from a spaceship into an unknown world in order to collect as much wood as possible. The robot is discovering the world as he progresses,so he has to make constantly the right choices to collect all the wood as fast as he can. <br> 
 But, there are different kind of worlds as there are some worlds with Hell ground that the robot cannot touch otherwise he will die.<br>
 Also, the robot is able to take advantages from suffering ground that will increase or decrease his speed.<br>
