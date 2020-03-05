@@ -7,11 +7,13 @@ There are 21 worlds in the "tests/" repository and 4 more in the "myworld/" repo
 
 ## How to use : Lambda Man 
 To use this project,make sure you are working on a GNU/Linux distribution and have installed Opam 2. <br>
+Also,for the graphic version (-g option),we used the [camlimages library](https://opam.ocaml.org/packages/camlimages/) so make sure to download it. <br>
 then `$ ./configure ` will install all the project dependancies on a Opam installation. <br>
 If everything went well , you will have the following message : <br>
 
 > Congratulations! Your project is ready for development.
 
+Run `$ eval (opam env)` to update the current shell environment. <br>
 Now, you can compile with `$ make` and it will create an executable file called "lambda". <br>
 Finally,you can launch the game with : 
 
